@@ -1,3 +1,8 @@
+"""
+From: https://github.com/messiest/amzn-rekognition
+
+Used with author's permission.
+"""
 import sys
 import pickle
 import boto3
@@ -85,6 +90,14 @@ def moderation_detection(bucket, image):
 
 
 def main(n=10):
+    """
+    main function
+
+    :param n: number of images to run
+    :type n: int
+    :return: results of running amazon's rekognition
+    :rtype: dict
+    """
     global bucket
 
     print("Running image processing...")

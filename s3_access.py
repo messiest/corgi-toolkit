@@ -1,3 +1,8 @@
+"""
+From: https://github.com/messiest/amzn-bucket
+
+Used with author's permission.
+"""
 import numpy as np
 import boto3
 import botocore
