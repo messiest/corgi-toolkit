@@ -30,21 +30,7 @@ def object_detection(bucket, image, threshold=75):
     return labels
 
 
-def face_detection(bucket, image, threshold=75):
-    global client
-
-    response = client.detect_faces(Image={'S3Object': {'Bucket': bucket, 'Name': image}})
-    if printer:
-        print('Detected celebrities in ' + image)
-        print(list(response.keys()))
-
-    labels = []
-    if response['FaceDetails']:
-        labels = [i for i in response['FaceDetails']]
-    return labels
-
-
-def text_detection(bucket, image, threshold=75):
+def text_detection(bucket, image):
     global client
 
     response = client.detect_text(Image={'S3Object': {'Bucket': bucket, 'Name': image}})
@@ -79,7 +65,7 @@ def main(n=10):
 
     print("Running image processing...")
     try:
-        results = pickle.load(open('image-tags.pkl', 'rb'))
+        results = pickle.load(open('jar/image-tags.pkl', 'rb'))
         print('loaded pickle')
         print("Total Images: {}".format(len(results.keys())))
 
@@ -104,19 +90,18 @@ def main(n=10):
                 results[image] = {i: None for i in ['objects', 'moderation', 'text'] if i not in results[image].keys()}
         break
 
-    pickle.dump(results, open('image-tags.pkl', 'wb'))
+    pickle.dump(results, open('jar/image-tags.pkl', 'wb'))
 
-    print(results)
+    # print(results)
 
     return results
 
 
 if __name__ == "__main__":
+    printer = True
 
-    print("Start")
-    printer = False
     service = 'rekognition'
-    print("Connection to {}...".format(service))
+    print("Connecting to {}...".format(service))
     client = boto3.client(service)
     bucket = S3Bucket('trackmaven-images')
     bucket.connect()
@@ -128,6 +113,6 @@ if __name__ == "__main__":
 
     for i in features.keys():
         print("Image: ", i)
-        print(' Objects: ', features[i]['objects'])
-        print(' Text: ', features[i]['text'])
-        print(' Moderation: ', features[i]['moderation'])
+        print('Objects: ', features[i]['objects'])
+        print('Text: ', features[i]['text'])
+        print('Moderation: ', features[i]['moderation'])
