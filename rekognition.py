@@ -31,6 +31,18 @@ def object_detection(bucket, image, threshold=75):
 
 
 def text_detection(bucket, image):
+    """
+    run text detection on image
+
+    :param bucket: name of s3 bucket
+    :type bucket: str
+    :param image: file name of image
+    :type image: str
+    :param threshhold: starting confidence threshold
+    :type threshhold: int
+    :return: dictionary of labels
+    :rtype:
+    """
     global client
 
     response = client.detect_text(Image={'S3Object': {'Bucket': bucket, 'Name': image}})
@@ -45,7 +57,19 @@ def text_detection(bucket, image):
     return labels
 
 
-def moderation_detection(bucket, image, threshold=75):
+def moderation_detection(bucket, image):
+    """
+    run moderation detection on image
+
+    :param bucket: name of s3 bucket
+    :type bucket: str
+    :param image: file name of image
+    :type image: str
+    :param threshhold: starting confidence threshold
+    :type threshhold: int
+    :return: dictionary of labels
+    :rtype:
+    """
     global client
 
     response = client.detect_moderation_labels(Image={'S3Object': {'Bucket': bucket, 'Name': image}})
@@ -92,13 +116,11 @@ def main(n=10):
 
     pickle.dump(results, open('jar/image-tags.pkl', 'wb'))
 
-    # print(results)
-
     return results
 
 
 if __name__ == "__main__":
-    printer = True
+    printer = False
 
     service = 'rekognition'
     print("Connecting to {}...".format(service))

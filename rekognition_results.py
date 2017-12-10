@@ -14,6 +14,8 @@ def get_text():
 
     print("{} words, {} unique".format(len(words), len(set(words))))
 
+    return words
+
 
 def get_objects():
     file = open('jar/image-tags.pkl', 'rb')
@@ -27,6 +29,8 @@ def get_objects():
 
     print("{} objects, {} unique".format(len(objects), len(set(objects))))
 
+    return objects
+
 
 def get_moderation():
     file = open('jar/image-tags.pkl', 'rb')
@@ -39,8 +43,9 @@ def get_moderation():
                 print(word)
                 moderation.append(word.lower())
 
-    print(moderation)
     print("{} moderation, {} unique".format(len(moderation), len(set(moderation))))
+
+    return moderation
 
 
 def main():
