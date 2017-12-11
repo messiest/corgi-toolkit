@@ -111,3 +111,4 @@ venv.bak/
 *.csv
 *.pkl
 *.pyc
+*.json

@@ -27,6 +27,7 @@ def object_detection(bucket, image, threshold=75):
     global client
 
     response = client.detect_labels(Image={'S3Object': {'Bucket': bucket, 'Name': image}}, MinConfidence=threshold)
+
     if printer:
         print('Detected labels in ' + image)
         print(list(response.keys()))
@@ -61,6 +62,32 @@ def text_detection(bucket, image):
 
     return labels
 
+def face_detection(bucket, image):
+    """
+    run text detection on image
+
+    :param bucket: name of s3 bucket
+    :type bucket: str
+    :param image: file name of image
+    :type image: str
+    :param threshhold: starting confidence threshold
+    :type threshhold: int
+    :return: dictionary of labels
+    :rtype:
+    """
+    global client
+
+    response = client.detect_faces(Image={'S3Object': {'Bucket': bucket, 'Name': image}})
+    # if printer:
+    #     print('Detected celebrities in ' + image)
+    #     print(list(response.keys()))
+
+    # labels = []
+    # if response['TextDetections']:
+    #     labels = [i['DetectedText'] for i in response['TextDetections']]
+
+    return response
+
 
 def moderation_detection(bucket, image):
     """
@@ -91,7 +118,7 @@ def moderation_detection(bucket, image):
 
 def main(n=10):
     """
-    main function
+    Run image recognition
 
     :param n: number of images to run
     :type n: int
@@ -121,10 +148,11 @@ def main(n=10):
                 results[image]['objects'] = object_detection('trackmaven-images', image)
                 results[image]['moderation'] = moderation_detection('trackmaven-images', image)
                 results[image]['text'] = text_detection('trackmaven-images', image)
+                results[image]['faces'] = face_detection('trackmaven-images', image)
 
             except:
                 print("Error: ", image)
-                results[image] = {i: None for i in ['objects', 'moderation', 'text'] if i not in results[image].keys()}
+                results[image] = {i: None for i in ['objects', 'moderation', 'text', 'faces'] if i not in results[image].keys()}
         break
 
     pickle.dump(results, open('jar/image-tags.pkl', 'wb'))
@@ -151,3 +179,6 @@ if __name__ == "__main__":
         print('Objects: ', features[i]['objects'])
         print('Text: ', features[i]['text'])
         print('Moderation: ', features[i]['moderation'])
+        print('Faces: ', features[i]['faces'])
+
+

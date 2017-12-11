@@ -2,8 +2,8 @@ import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 
 
-def get_text():
-    file = open('jar/image-tags.pkl', 'rb')
+def get_text(file_name):
+    file = open(file_name, 'rb')
     data = pickle.load(file)
 
     words = []
@@ -17,8 +17,8 @@ def get_text():
     return words
 
 
-def get_objects():
-    file = open('jar/image-tags.pkl', 'rb')
+def get_objects(file_name):
+    file = open(file_name, 'rb')
     data = pickle.load(file)
 
     objects = []
@@ -32,14 +32,14 @@ def get_objects():
     return objects
 
 
-def get_moderation():
-    file = open('jar/image-tags.pkl', 'rb')
+def get_moderation(file_name):
+    file = open(file_name, 'rb')
     data = pickle.load(file)
 
     moderation = []
     for image in data.keys():
         if data[image]['moderation']:
-            for word in data[image]['moderation']:
+            for word in data[image]['text']:
                 print(word)
                 moderation.append(word.lower())
 
@@ -49,9 +49,11 @@ def get_moderation():
 
 
 def main():
-    get_moderation()
-    # get_text()
-    # get_objects()
+    file = 'jar/image-tags.pkl'
+
+    print(get_moderation(file))
+    print(get_text(file))
+    print(get_objects(file))
 
 
 if __name__ == "__main__":

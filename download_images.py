@@ -8,7 +8,6 @@ import boto3
 from s3_access import S3Bucket
 
 BUCKET_NAME = "trackmaven-images"
-
 s3 = boto3.resource('s3')
 
 
