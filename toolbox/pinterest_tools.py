@@ -37,11 +37,11 @@ def main():
     :return:
     :rtype:
     """
-    if not os.path.exists('../data/pinterest_data.csv'):
-        df_new = process_raw.main()
-
-    else:
-        df_new = pd.read_csv('../publication_data/{}.csv', index_col=0)
+    # if not os.path.exists('../data/pinterest_data.csv'):
+    #     df_new = process_raw.main()
+    #
+    # else:
+    df_new = pd.read_csv('data/pin_images.csv', index_col=0)  # work around for posts
 
     return df_new
 

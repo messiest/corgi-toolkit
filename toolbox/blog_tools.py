@@ -135,17 +135,19 @@ def main(publication="glamour"):
     :return:
     :rtype:
     """
-    if not os.path.exists('../publication_data/{}.csv'.format(publication)):
-        df_new = process_raw.main()
-        df_blogs = create_blogs_df(df_new)
-        pub = get_publication(df_blogs, publication)
+    # if not os.path.exists('../publication_data/{}.csv'.format(publication)):
+    #     df_new = process_raw.main()
+    #     df_blogs = create_blogs_df(df_new)
+    #     pub = get_publication(df_blogs, publication)
+    #
+    # else:
+    print("Publication data already exists.\nLoading {} data...".format(publication))
+    # pub = pd.read_csv('../publication_data/{}.csv'.format(publication), index_col=0)
+    pub = pd.read_csv('data/glam_images.csv', index_col=0)
+    pub.reset_index(inplace=True)
 
-    else:
-        print("Publication data already exists.\nLoading {} data...".format(publication))
-        pub = pd.read_csv('../publication_data/{}.csv'.format(publication), index_col=0)
-        pub.reset_index(inplace=True)
-
-    pub = pub.sample(5000, random_state=42)
+    print(pub.shape)
+    # pub = pub.sample(5000, random_state=42)
 
 
 
@@ -158,6 +160,8 @@ def main(publication="glamour"):
     # pub.drop('scraped', axis=1, inplace=True)
 
     pre_scraped = pd.read_csv('data/BlogMaster.csv', index_col=0, low_memory=False)  # TODO (@messiest) fix this hacky work around...
+
+
     pre_scraped = pre_scraped[pre_scraped['pub'] == publication]
     pub['blog_post'] = pre_scraped.loc[:, 'blogpost']
 

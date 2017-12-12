@@ -222,7 +222,8 @@ def image_objects(df):  # TODO (@messiest) Get this from / move this to the reko
     :return:
     :rtype:
     """
-    images = rekognition.run(df['id'])
+    # images = rekognition.run(df['id'])
+    images = rekognition.run(df['uniqueid'])
     image_detects = {}
     for img in images.keys():
         objects = images[img]['objects']
@@ -249,10 +250,7 @@ def image_objects(df):  # TODO (@messiest) Get this from / move this to the reko
                     objects[o].append(0)
 
 
-    print(objects)
     image_df = pd.DataFrame(objects)
-
-    print("IMAGES ", image_df)
 
     return image_df
 
@@ -288,7 +286,12 @@ def main(medium_type, publication, feature_words=None):
         df.reset_index(drop=True)
         images.reset_index(drop=True)
 
+        print("DF: ", df.shape)
+        print("IMAGES:", images.shape)
+
         df = df.merge(images, left_index=True, right_index=True)
+
+        print(df.shape)
 
     elif medium_type == 'pin':
         df = pinterest_tools.main()
@@ -309,9 +312,14 @@ def main(medium_type, publication, feature_words=None):
         df.reset_index(drop=True)
         images.reset_index(drop=True)
 
+        print(df.shape)
+        print(images.shape)
+
         df = df.merge(images, left_index=True, right_index=True)
 
-    df.to_csv('processed_data/{}_{}.csv'.format(publication, medium_type))
+        print(df.shape)
+
+    df.to_csv('processed_data/{}_{}.csv'.format(publication, medium_type.replace(' ', '_')))
 
     return df
 
@@ -319,6 +327,7 @@ def main(medium_type, publication, feature_words=None):
 if __name__ == "__main__":
     try:
         main(sys.argv[1], sys.argv[2])
+
     except IndexError:
         platform = input('What platform would you like to analyze? ')
         print("Analyzing {}...".format(platform))
