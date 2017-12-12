@@ -159,9 +159,7 @@ def topic_modeling(df, lem_list, n_topics=5, n_words=30, n_passes=3):
     print("Adding topic probabilities to DataFrame...")
 
     for j in range(n_topics):
-        print('Adding topic {}...'.format(j))
-        print("TOPIC VECTOR: ", topic_vector[0][0])
-
+        print('  Adding topic {}...'.format(j))
         df["topic_{}".format(j)] = [topic_vector[i][j][1] if len(topic_vector[i]) == n_topics else np.NaN for i in range(len(topic_vector))]
 
     print("Percetange of observations missing topic values: {}%".format(df['topic_0'].isnull().sum()/df.shape[0]*100))
@@ -240,6 +238,7 @@ def image_objects(df):  # TODO (@messiest) Get this from / move this to the reko
                 if k not in objects.keys():
                     objects[k] = []
 
+
     for k in image_detects.keys():
         objs = image_detects[k]
         if isinstance(objs, dict):
@@ -249,7 +248,11 @@ def image_objects(df):  # TODO (@messiest) Get this from / move this to the reko
                 else:
                     objects[o].append(0)
 
+
+    print(objects)
     image_df = pd.DataFrame(objects)
+
+    print("IMAGES ", image_df)
 
     return image_df
 
@@ -280,30 +283,33 @@ def main(medium_type, publication, feature_words=None):
 
         new_titles = lemmatizing(df, 'title', stop_words=True)
 
-        df = get_title_features(df, 'title', lemmatized_titles, word_list)
-        df = pd.concat([df, images], axis=1)
-
-        print("HERE")
-
         df = topic_modeling(df, new_titles)
+
+        df.reset_index(drop=True)
+        images.reset_index(drop=True)
+
+        df = df.merge(images, left_index=True, right_index=True)
 
     elif medium_type == 'pin':
         df = pinterest_tools.main()
 
         lemmatized_titles = lemmatizing(df, 'description', stop_words=False)
         df = get_title_features(df, 'description', lemmatized_titles, word_list)
+
         df['title_polarity'] = df['title'].apply(get_polarity)
         df['title_subjectivity'] = df['title'].apply(get_subjectivity)
 
         df = topic_modeling(df, lem_list=lemmatized_titles)
 
-        images = image_objects(df)  # load images
-
+        images = image_objects(df)  # load image detection
         new_titles = lemmatizing(df, 'title', stop_words=True)
-        df = get_title_features(df, 'title', lemmatized_titles, word_list)
-        df = pd.concat([df, images], axis=1)
 
         df = topic_modeling(df, lem_list=new_titles)
+
+        df.reset_index(drop=True)
+        images.reset_index(drop=True)
+
+        df = df.merge(images, left_index=True, right_index=True)
 
     df.to_csv('processed_data/{}_{}.csv'.format(publication, medium_type))
 
