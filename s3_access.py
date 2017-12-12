@@ -1,7 +1,7 @@
 """
-From: https://github.com/messiest/amzn-bucket
-
 Used with author's permission.
+
+From: https://github.com/messiest/amzn-bucket
 """
 import numpy as np
 import boto3
@@ -85,9 +85,7 @@ class S3Bucket:
 
 
 def main():
-    #TODO (@messiest) Have progress print outs
-
-    bucket = S3Bucket('doodle-bot')
+    bucket = S3Bucket('trackmaven-images')
     bucket.connect()
     bucket.get_objects()
     filenames = bucket.get_keys()

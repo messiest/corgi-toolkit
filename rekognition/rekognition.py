@@ -1,14 +1,19 @@
 """
-From: https://github.com/messiest/amzn-rekognition
+Used with creator's permission.
 
-Used with author's permission.
+From: https://github.com/messiest/amzn-rekognition
 """
 import sys
 import pickle
 import boto3
 import botocore
+import pandas as pd
 
 from s3_access import S3Bucket
+
+import time
+
+client = boto3.client('rekognition')
 
 
 def object_detection(bucket, image, threshold=75):
@@ -22,7 +27,7 @@ def object_detection(bucket, image, threshold=75):
     :param threshhold: starting confidence threshold
     :type threshhold: int
     :return: dictionary of labels
-    :rtype:
+    :rtype: dict
     """
     global client
 
@@ -61,6 +66,7 @@ def text_detection(bucket, image):
         labels = [i['DetectedText'] for i in response['TextDetections']]
 
     return labels
+
 
 def face_detection(bucket, image):
     """
@@ -116,6 +122,57 @@ def moderation_detection(bucket, image):
     return labels
 
 
+def run(images):
+    """
+        Run rekognition for pipeline.
+
+        :param n: number of images to run
+        :type n: int
+        :return: results of running amazon's rekognition
+        :rtype: dict
+    """
+    global client
+
+    print("Running image processing...")
+    # images = ["{}.jpg".format(i) for i in images]
+    results = {}
+
+    try:
+        existing = pickle.load(open('jar/image-tags.pkl', 'rb'))
+        print('Pickle exists...', 'Pickle loaded.')
+        print("  Total Images: {}".format(len(existing.keys())))
+
+    except:
+        print('No Pickle found.\nCreating new data object.')
+        existing = {}
+
+    for i, image in enumerate(images):
+        start = time.time()
+        print("{} - {}".format(i, image))
+        try:
+            if image in existing.keys():  # skip files that have already been processed
+                results[image] = existing[image]
+                continue
+            else:
+                results[image] = {}
+                results[image]['objects'] = object_detection('trackmaven-images', image)
+                results[image]['moderation'] = moderation_detection('trackmaven-images', image)
+                results[image]['text'] = text_detection('trackmaven-images', image)
+                results[image]['faces'] = face_detection('trackmaven-images', image)
+
+                existing[image] = results[image]
+
+        except:
+            print("Error: ", image)
+            results[image] = {i: None for i in ['objects', 'moderation', 'text', 'faces'] if
+                              i not in results[image].keys()}
+
+        print(" timer: {:2f}".format(time.time() - start))
+
+    pickle.dump(existing, open('jar/image-tags.pkl', 'wb'))
+
+    return results
+
 def main(n=10):
     """
     Run image recognition
@@ -139,6 +196,7 @@ def main(n=10):
     processed_images = 0
     while processed_images < n:
         for i, image in enumerate(bucket.sample(n)):
+            print(i, image)
             try:
                 if image in results.keys():  # skip files that have already been processed
                     continue
@@ -170,9 +228,13 @@ if __name__ == "__main__":
     bucket.connect()
 
     try:
-        features = main(n=int(sys.argv[1]))
+        # features = main(n=int(sys.argv[1]))
+        df = pd.read_csv(sys.argv[1], index_col=0)
+        images = list(list(df['uniqueid'] + ".jpg"))
+        features = run(images)
+
     except IndexError:
-        features = main()
+        print("ERROR")
 
     for i in features.keys():
         print("Image: ", i)
@@ -180,5 +242,3 @@ if __name__ == "__main__":
         print('Text: ', features[i]['text'])
         print('Moderation: ', features[i]['moderation'])
         print('Faces: ', features[i]['faces'])
-
-

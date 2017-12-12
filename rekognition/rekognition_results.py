@@ -2,8 +2,22 @@ import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 
 
-def get_text(file_name):
-    file = open(file_name, 'rb')
+"""
+This file is used to return results from the dictionary that is created as a result of rekognition api calls.
+
+"""
+
+def get_text(file_path):
+    """
+    return the results of the file detection for the passed file_name
+
+    :param file_path: file name of image file on
+    :type file_path:
+    :return:
+    :rtype:
+    """
+
+    file = open(file_path, 'rb')
     data = pickle.load(file)
 
     words = []
@@ -18,6 +32,15 @@ def get_text(file_name):
 
 
 def get_objects(file_name):
+    """
+    return the results of the file detection for the passed file_name
+
+    :param file_path: file name of image file on
+    :type file_path:
+    :return:
+    :rtype:
+    """
+
     file = open(file_name, 'rb')
     data = pickle.load(file)
 
@@ -33,6 +56,14 @@ def get_objects(file_name):
 
 
 def get_moderation(file_name):
+    """
+    return the results of the file detection for the passed file_name
+
+    :param file_path: file name of image file on
+    :type file_path:
+    :return:
+    :rtype:
+    """
     file = open(file_name, 'rb')
     data = pickle.load(file)
 
@@ -46,6 +77,13 @@ def get_moderation(file_name):
     print("{} moderation, {} unique".format(len(moderation), len(set(moderation))))
 
     return moderation
+
+
+# def run(files, pickle_='jar/image-tags.pkl'):
+#     results = {}
+#     for file in files:
+#         pass
+#     pass
 
 
 def main():
