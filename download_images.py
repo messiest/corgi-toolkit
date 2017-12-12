@@ -1,17 +1,35 @@
+"""
+Used with author's permission.
+
+From: https://github.com/messiest/amzn-bucket
+"""
 import sys
 import pandas as pd
 import numpy as np
 import requests
-
 import boto3
 
 from s3_access import S3Bucket
+
 
 BUCKET_NAME = "trackmaven-images"
 s3 = boto3.resource('s3')
 
 
 def download_image(bucket, key, url):
+    """
+    download an image to an s3 bucket
+
+    :param bucket:
+    :type bucket:
+    :param key:
+    :type key:
+    :param url:
+    :type url:
+    :return:
+    :rtype:
+    """
+
     global s3
     try:
         print("  Downloading: ", url)
