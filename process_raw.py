@@ -13,12 +13,12 @@ def fetch_json(update=False):
     :rtype:
     """
     print("Fetching data from source...")
-    if os.path.exists("../raw_data/newdump.json") and not update:  # don't download if path exists, and not forcing update
+    if os.path.exists("raw_data/newdump.json") and not update:  # don't download if path exists, and not forcing update
         print("Raw data already exists.")
     else:
         print("Downloading json...")
         req = requests.get("https://s3.amazonaws.com/temp-data-pulls/newdump.json", stream=True)
-        with open("../raw_data/newdump.json", 'wb') as file:
+        with open("raw_data/newdump.json", 'wb') as file:
             shutil.copyfileobj(req.raw, file)
     print("Download complete.")
 

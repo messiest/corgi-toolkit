@@ -144,7 +144,7 @@ def topic_modeling(df, lem_list, n_topics=5, n_words=30, n_passes=3):
     corpus = [dictionary.doc2bow(text) for text in lem_list]  # convert tokenized documents into a document-term matrix
 
     print("Generating Model...")
-    ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=n_topics, id2word = dictionary, passes=n_passes)
+    ldamodel = gensim.models.ldamodel.LdaModel(corpus, num_topics=n_topics, id2word=dictionary, passes=n_passes)
     topics = ldamodel.print_topics(num_topics=n_topics, num_words=n_words)
     print("Topics\n")
 
@@ -152,13 +152,16 @@ def topic_modeling(df, lem_list, n_topics=5, n_words=30, n_passes=3):
         print(f"  topic {topics[i][0]}: \n")
         print(topics[i][1], "\n")
 
-
     topic_vector = ldamodel[corpus]  # retrieve ldamodel[corpus] # retrieve topic_vector
+
+    print("TOPIC VECTOR: ", topic_vector)
 
     print("Adding topic probabilities to DataFrame...")
 
     for j in range(n_topics):
         print('Adding topic {}...'.format(j))
+        print("TOPIC VECTOR: ", topic_vector[0][0])
+
         df["topic_{}".format(j)] = [topic_vector[i][j][1] if len(topic_vector[i]) == n_topics else np.NaN for i in range(len(topic_vector))]
 
     print("Percetange of observations missing topic values: {}%".format(df['topic_0'].isnull().sum()/df.shape[0]*100))
@@ -253,7 +256,7 @@ def image_objects(df):  # TODO (@messiest) Get this from / move this to the reko
 
 def main(medium_type, publication, feature_words=None):
 
-    word_list = ['best', 'sex', 'now', 'new', 'episode', 'how']
+    word_list = [word.replace('\n', '') for word in open('lists/top_words.txt')]
 
     if feature_words:
         word_list = [i.lower() for i in feature_words]
@@ -264,6 +267,7 @@ def main(medium_type, publication, feature_words=None):
         df = blog_tools.main(publication)
 
         lemmatized_titles = lemmatizing(df, 'title', stop_words=False)
+
         df = get_title_features(df, 'title', lemmatized_titles, word_list)
 
         df['description_polarity'] = df['blog_post'].apply(get_polarity)  # get polarity scores
@@ -272,25 +276,34 @@ def main(medium_type, publication, feature_words=None):
         df['title_polarity'] = df['title'].apply(get_polarity)  # get polarity scores
         df['title_subjectivity'] = df['title'].apply(get_subjectivity)  # get subjectivity scores
 
+        images = image_objects(df)  # load images
 
-        quit()
+        new_titles = lemmatizing(df, 'title', stop_words=True)
+
+        df = get_title_features(df, 'title', lemmatized_titles, word_list)
+        df = pd.concat([df, images], axis=1)
+
+        print("HERE")
+
+        df = topic_modeling(df, new_titles)
+
+    elif medium_type == 'pin':
+        df = pinterest_tools.main()
+
+        lemmatized_titles = lemmatizing(df, 'description', stop_words=False)
+        df = get_title_features(df, 'description', lemmatized_titles, word_list)
+        df['title_polarity'] = df['title'].apply(get_polarity)
+        df['title_subjectivity'] = df['title'].apply(get_subjectivity)
+
+        df = topic_modeling(df, lem_list=lemmatized_titles)
+
         images = image_objects(df)  # load images
 
         new_titles = lemmatizing(df, 'title', stop_words=True)
         df = get_title_features(df, 'title', lemmatized_titles, word_list)
         df = pd.concat([df, images], axis=1)
 
-        df = topic_modeling(df, lem_list=lemmatized_titles)
-
-    elif medium_type == 'pin':
-        df = pinterest_tools.main(publication)
-
-        lemmatized_titles = lemmatizing(df, 'description', stop_words = False)
-        df = get_title_features(df, 'description', lemmatized_titles, word_list)
-        df['title_polarity'] = df['title'].apply(get_polarity)
-        df['title_subjectivity'] = df['title'].apply(get_subjectivity)
-
-        df = topic_modeling(df, lem_list=lemmatized_titles)
+        df = topic_modeling(df, lem_list=new_titles)
 
     df.to_csv('processed_data/{}_{}.csv'.format(publication, medium_type))
 
@@ -299,6 +312,13 @@ def main(medium_type, publication, feature_words=None):
 
 if __name__ == "__main__":
     try:
-        main('blog post', sys.argv[1])
+        main(sys.argv[1], sys.argv[2])
     except IndexError:
-        main('blog post', 'allure')
+        platform = input('What platform would you like to analyze? ')
+        print("Analyzing {}...".format(platform))
+
+        publication = None
+        if platform == 'blog post':
+            publication = input('Which publication would you like to analyze? ')
+
+        main(platform, publication)

@@ -4,13 +4,13 @@ Used with author's permission.
 From: https://github.com/messiest/amzn-bucket
 """
 import sys
-import pandas as pd
-import numpy as np
-import requests
+
 import boto3
+import numpy as np
+import pandas as pd
+import requests
 
-from s3_access import S3Bucket
-
+from s3.s3_access import S3Bucket
 
 BUCKET_NAME = "trackmaven-images"
 s3 = boto3.resource('s3')

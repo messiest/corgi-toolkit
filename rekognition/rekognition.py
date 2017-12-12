@@ -3,15 +3,14 @@ Used with creator's permission.
 
 From: https://github.com/messiest/amzn-rekognition
 """
-import sys
 import pickle
+import sys
+import time
+
 import boto3
-import botocore
 import pandas as pd
 
-from s3_access import S3Bucket
-
-import time
+from s3.s3_access import S3Bucket
 
 client = boto3.client('rekognition')
 
@@ -137,9 +136,11 @@ def run(images):
     # images = ["{}.jpg".format(i) for i in images]
     results = {}
 
+    images = [img + ".jpg" for img in images]
+
     try:
         existing = pickle.load(open('jar/image-tags.pkl', 'rb'))
-        print('Pickle exists...', 'Pickle loaded.')
+        print('Pickle exists...\n', 'Pickle loaded.')
         print("  Total Images: {}".format(len(existing.keys())))
 
     except:
@@ -213,7 +214,7 @@ def main(n=10):
                 results[image] = {i: None for i in ['objects', 'moderation', 'text', 'faces'] if i not in results[image].keys()}
         break
 
-    pickle.dump(results, open('jar/image-tags.pkl', 'wb'))
+    pickle.dump(results, open('jar/image-tags-copy.pkl', 'wb'))
 
     return results
 

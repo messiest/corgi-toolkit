@@ -14,12 +14,11 @@ def scrape_blog(url, publication):
     """
     get text of blog post
 
-
     :param url: url to the blog post
     :type url: str
     :param publication: the publication's name
     :type publication: str
-    :return: (article, info)
+    :return: (article text, article info)
     :rtype: tuple
     """
     article = ""
@@ -30,7 +29,7 @@ def scrape_blog(url, publication):
         request = requests.get(url)
         soup = BeautifulSoup(request.text, "lxml")
         info = json.loads(soup.find('script', type='application/ld+json').text)
-    except:
+    except:  # if link connection breaks, return dict populated w/ None
         article = "Link is Dead"
         other_info = {'headline': None, 'image': None, 'description': None, 'keywords': None, '@type': None}
         return article, other_info
@@ -127,21 +126,40 @@ def get_publication(df, publication):
     return pubs
 
 
-def main(publication="vogue"):
-    if not os.path.exists('publication_data/{}.csv'.format(publication)):
+def main(publication="glamour"):
+    """
+
+
+    :param publication:
+    :type publication:
+    :return:
+    :rtype:
+    """
+    if not os.path.exists('../publication_data/{}.csv'.format(publication)):
         df_new = process_raw.main()
         df_blogs = create_blogs_df(df_new)
         pub = get_publication(df_blogs, publication)
 
     else:
-        pub = pd.read_csv('publication_data/{}.csv'.format(publication), index_col=0)
+        print("Publication data already exists.\nLoading {} data...".format(publication))
+        pub = pd.read_csv('../publication_data/{}.csv'.format(publication), index_col=0)
+        pub.reset_index(inplace=True)
 
-    pub['scraped'] = pub['link'].apply(lambda x: scrape_blog(x, publication))  # scrape blog post
+    pub = pub.sample(5000, random_state=42)
 
-    pub = pd.concat([pub, pub['scraped'].apply(pd.Series)], axis=1)
-    pub.columns.values[-2] = 'blog_post'
-    pub.columns.values[-1] = 'blog_details'
-    pub.drop('scraped', axis=1, inplace=True)
+
+
+    # by passed to save on scraping time
+    # pub['scraped'] = pub['link'].apply(lambda x: scrape_blog(x, publication))  # scrape blog post
+
+    # pub = pd.concat([pub, pub['scraped'].apply(pd.Series)], axis=1)
+    # pub.columns.values[-2] = 'blog_post'
+    # pub.columns.values[-1] = 'blog_details'
+    # pub.drop('scraped', axis=1, inplace=True)
+
+    pre_scraped = pd.read_csv('data/BlogMaster.csv', index_col=0, low_memory=False)  # TODO (@messiest) fix this hacky work around...
+    pre_scraped = pre_scraped[pre_scraped['pub'] == publication]
+    pub['blog_post'] = pre_scraped.loc[:, 'blogpost']
 
     return pub
 
@@ -151,4 +169,4 @@ if __name__ == "__main__":
         main(sys.argv[1])
 
     except IndexError:
-        main()
+        print(main())

@@ -1,6 +1,4 @@
 import pickle
-from sklearn.feature_extraction.text import CountVectorizer
-
 
 """
 This file is used to return results from the dictionary that is created as a result of rekognition api calls.
