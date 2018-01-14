@@ -20,7 +20,7 @@ def download_image(bucket, key, url):
     """
     download an image to an s3 bucket
 
-    :param bucket:
+    dfad:param bucket:
     :type bucket:
     :param key:
     :type key:
